@@ -7,10 +7,12 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 
 class FirstFragment : Fragment() {
 
@@ -50,30 +52,51 @@ class FirstFragment : Fragment() {
         }
 
 
-        fun EditText.onTextChanged(onTextChanged: (Int) -> Unit) {
-            this.addTextChangedListener(object : TextWatcher {
+        fun EditText.onTextChanged(onTextChanged: (String) -> Unit) {
+             this.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 }
 
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    if (p0.isNullOrEmpty()) generateButton?.isEnabled = false
-                    else onTextChanged.invoke(p0.toString().toInt())
+                    try {
+                        if (p0.isNullOrEmpty()) generateButton?.isEnabled = false
+                        else {
+                            previousResult?.isFocusable = false
+                            onTextChanged.invoke(p0.toString())
+                        }
+                    } catch (e: NumberFormatException) {
+                        Snackbar.make(view, "You entered too large a number", Snackbar.LENGTH_LONG).show()
+                        previousResult?.isFocusable = true
+                        previousResult?.requestFocus()
+                        val inputManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputManager.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+                        generateButton?.isEnabled = false
+                        onTextChanged.invoke("")
+                    }
                 }
 
                 override fun afterTextChanged(p0: Editable?) {
                 }
             })
+
         }
             minEditText?.onTextChanged {
-                min = it
-                generateButton?.isEnabled = min < max
+                if(it.isEmpty()) {
+                    minEditText?.setText("")
+                }else {
+                    min = it.toInt()
+                    generateButton?.isEnabled = min < max
+                }
             }
 
-
             maxEditText?.onTextChanged {
-                max = it
-                if (!minEditText?.text.isNullOrEmpty())
+                if(it.isEmpty()) {
+                    max = 0
+                    maxEditText?.setText("")
+                }else {
+                    max = it.toInt()
                     generateButton?.isEnabled = min < max
+                }
         }
     }
 
