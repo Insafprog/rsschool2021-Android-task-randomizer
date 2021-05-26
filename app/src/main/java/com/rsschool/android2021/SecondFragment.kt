@@ -15,6 +15,7 @@ class SecondFragment : Fragment() {
 
     private var backButton: Button? = null
     private var result: TextView? = null
+    private var generatedResult: Int? = null
 
     private var listener: ActionEventListener? = null
 
@@ -34,13 +35,14 @@ class SecondFragment : Fragment() {
         val min = arguments?.getInt(MIN_VALUE_KEY) ?: 0
         val max = arguments?.getInt(MAX_VALUE_KEY) ?: 0
 
-        val generatedResult = generate(min, max)
+        generatedResult = generate(min, max)
 
         result?.text = generatedResult.toString()
 
         backButton?.setOnClickListener {
-            listener?.onSecondFragmentActionEvent(generatedResult)
-            Log.d("myTag", "click back button")
+            generatedResult?.let {
+                listener?.onSecondFragmentActionEvent(it)
+            }
         }
     }
 
