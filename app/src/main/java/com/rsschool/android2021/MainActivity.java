@@ -20,20 +20,27 @@ public class MainActivity extends AppCompatActivity implements ActionEventListen
         openFirstFragment(0);
     }
 
+    @Override
+    public void onBackPressed() {
+        final Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        if (currentFragment instanceof SecondFragment) {
+            SecondFragment fragment = (SecondFragment) currentFragment;
+            fragment.onActivityAttach();
+        }
+        else
+            super.onBackPressed();
+    }
+
     private void openFirstFragment(int previousNumber) {
         final Fragment firstFragment = FirstFragment.newInstance(previousNumber);
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
-        fragmentManager.popBackStack();
         transaction.replace(R.id.container, firstFragment).commit();
     }
 
     private void openSecondFragment(int min, int max) {
         final Fragment secondFragment = SecondFragment.newInstance(min, max);
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        fragmentManager.popBackStack("SecondFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
-        transaction.replace(R.id.container, secondFragment).addToBackStack("SecondFragment").commit();
+        transaction.replace(R.id.container, secondFragment, "SecondFragment").commit();
     }
 
     @Override
